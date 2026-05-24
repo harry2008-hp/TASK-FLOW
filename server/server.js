@@ -57,9 +57,15 @@ app.get('/api/status', (req, res) => {
   });
 });
 
-// Handle unhandled routes
-app.all('*', (req, res, next) => {
-  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
+// Serve static client assets
+app.use(express.static(path.join(__dirname, '../client/dist')));
+
+// Fallback all non-API routes to React Router index.html
+app.get('*', (req, res, next) => {
+  if (req.originalUrl.startsWith('/api')) {
+    return next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
+  }
+  res.sendFile(path.join(__dirname, '../client/dist/index.html'));
 });
 
 // Global error handling middleware
